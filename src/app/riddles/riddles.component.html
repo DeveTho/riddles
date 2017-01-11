@@ -1,0 +1,73 @@
+<h3>
+    Los de raadsels op
+</h3>
+
+<p>
+    <!--<button type="button" md-raised-button color="primary" (click)="openInstructions()">Instructies</button>-->
+    <button type="button" md-raised-button color="warn" (click)="backup()">Back-up</button>
+    <button type="button" md-raised-button color="accent" (click)="restore()">Terugzetten</button>
+</p>
+
+<md-grid-list cols="5" rowHeight="3em">
+    <md-grid-tile colspan="5">
+        <strong>{{ getRiddleCounts().wordCount }} verzamelde woorden</strong>
+    </md-grid-tile>
+    <md-grid-tile>
+        {{ getRiddleCounts().notStarted }} niet gestarte raadsels
+    </md-grid-tile>
+    <md-grid-tile>
+        {{ getRiddleCounts().running }} lopende raadsels
+    </md-grid-tile>
+    <md-grid-tile>
+        {{ getRiddleCounts().hintsUsed }} hints gebruikt
+    </md-grid-tile>
+    <md-grid-tile>
+        {{ getRiddleCounts().givenUp }} opgegeven raadsels
+    </md-grid-tile>
+    <md-grid-tile>
+        {{ getRiddleCounts().solved }} opgeloste raadsels
+    </md-grid-tile>
+</md-grid-list>
+
+<div *ngFor="let riddle of riddles">
+    <md-grid-list cols="8" rowHeight="3em">
+        <md-grid-tile colspan="3">
+            <div>
+                {{ riddle.title }}
+            </div>
+        </md-grid-tile>
+        <md-grid-tile>
+            <div>
+                <button type="button" md-raised-button [color]="riddle.solved || riddle.failed ? 'primary' : ''">{{ riddle.words }} woorden</button>
+            </div>
+        </md-grid-tile>
+        <md-grid-tile>
+            <div [hidden]="riddle.busy || riddle.solved || riddle.failed">
+                <button type="button" md-raised-button color="primary" (click)="startRiddle(riddle)">Starten</button>
+            </div>
+        </md-grid-tile>
+        <md-grid-tile>
+            <div [hidden]="!riddle.busy || riddle.hint || riddle.solved || riddle.failed">
+                <button type="button" md-raised-button color="accent" (click)="getHint(riddle)">Hint</button>
+            </div>
+        </md-grid-tile>
+        <md-grid-tile>
+            <div [hidden]="!riddle.busy || riddle.solved || riddle.failed">
+                <button type="button" md-raised-button color="warn" (click)="giveUp(riddle)">Opgeven</button>
+            </div>
+        </md-grid-tile>
+        <md-grid-tile>
+            <div [hidden]="!riddle.busy || riddle.solved || riddle.failed">
+                <button type="button" md-raised-button color="primary" (click)="solve(riddle)">Opgelost</button>
+            </div>
+        </md-grid-tile>
+    </md-grid-list>
+
+    <div [hidden]="!riddle.busy || riddle.solved || riddle.failed">
+        <div [innerHtml]="riddle.content"></div>
+        <p [hidden]="riddle.showAnswer">
+            <button type="button" md-raised-button (click)="showAnswer(riddle)">Toon antwoord</button>
+        </p>
+        <div [hidden]="!riddle.showAnswer" [innerHtml]="riddle.answer"></div>
+    </div>
+</div>

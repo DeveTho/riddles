@@ -1,0 +1,40 @@
+<h3>Schrijf een verhaal</h3>
+
+<p>
+    <button type="button" md-raised-button color="warn" (click)="backup()">Back-up</button>
+    <button type="button" md-raised-button color="accent" (click)="restore()">Terugzetten</button>
+</p>
+
+<div [hidden]="!running">
+  <form (submit)="addWords()">
+    <label for="words">Vul {{ wordsPerTurn }} woorden in:</label>
+    <md-input [(ngModel)]="words" name="words" id="words" required></md-input>
+    <button type="submit" md-raised-button color="primary">Toevoegen</button>
+  </form>
+
+  <p>
+    Het verhaal bestaat op dit moment uit {{ wordCount }} woorden.
+  </p>
+
+  <p>
+    Meest recente woorden
+    <br />
+    <label for="mostRecentWords">Aantal:</label>
+    <md-slider [(ngModel)]="mostRecentWords" min="0" max="30" step="1" thumb-label name="mostRecentWords" id="mostRecentWords"></md-slider>
+    <br /> {{ getMostRecentWords() }}
+  </p>
+
+  <p>
+    <button type="button" md-raised-button color="warn" (click)="endStory()">Beëindigen</button>
+  </p>
+</div>
+
+<div [hidden]="running">
+  <p>
+    <button type="button" md-raised-button color="primary" (click)="startStory()">Herbeginnen</button>
+  </p>
+
+  <p>
+    {{ story }}
+  </p>
+</div>

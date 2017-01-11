@@ -1,0 +1,626 @@
+import { Injectable } from '@angular/core';
+
+export class Riddle {
+  busy: boolean = false;
+  hint: boolean = false;
+  failed: boolean = false;
+  solved: boolean = false;
+  showAnswer: boolean = false;
+
+  constructor(
+    public key: string,
+    public title: string,
+    public content: string,
+    public answer: string,
+    public words: number = 12) {
+  }
+}
+
+@Injectable()
+export class RiddlesService {
+
+  constructor() { }
+
+  backup(): void {
+    var data = this.riddles.map(r => {
+      return {
+        key: r.key,
+        words: r.words,
+        busy: r.busy,
+        hint: r.hint,
+        failed: r.failed,
+        solved: r.solved,
+        showAnswer: r.showAnswer
+      };
+    });
+
+    localStorage.setItem('riddles', JSON.stringify(data));
+  }
+
+  restore(): void {
+    var data = JSON.parse(localStorage.getItem('riddles'));
+
+    for (var i = 0; i < data.length; i++) {
+      var element = data[i];
+      
+      for (var j = 0; j < this.riddles.length; j++) {
+        var riddle = this.riddles[j];
+        
+        if (element.key === riddle.key) {
+          riddle.words = element.words;
+          riddle.busy = element.busy;
+          riddle.hint = element.hint;
+          riddle.failed = element.failed;
+          riddle.solved = element.solved;
+          riddle.showAnswer = element.showAnswer;
+
+          break;
+        }
+      }
+    }
+  }
+
+  getAll(): Array<Riddle> {
+    return this.riddles.sort((a, b) => {
+      if (a.title > b.title) return 1;
+      if (a.title < b.title) return -1;
+      return 0;
+    });
+  }
+
+  private riddles: Array<Riddle> = [
+    new Riddle('stijgende-slak', 'Stijgende slak', `
+<p>
+  <strong>Inleiding:</strong>
+  <br />Een slak bevindt zich op de bodem van een 20 meter diepe put. Elke dag klimt de slak 5 meter omhoog, maar 's nachts
+  glijdt hij weer 4 meter terug naar beneden.
+</p>
+<p>
+  <strong>Vraag:</strong>
+  <br />Hoeveel dagen duurt het voordat de slak de bovenrand van de put heeft bereikt?
+</p>
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br />Op de eerste dag bereikt de slak een hoogte van vijf meter, en hij glijdt 's nachts weer 4 meter naar beneden. Dus
+  eindigt hij op een hoogte van 1 meter.
+  <br /> De tweede dag bereikt hij de 6 meter, maar hij glijdt terug naar de 2 meter.
+  <br /> De derde dag bereikt hij de 7 meter, maar glijdt terug naar de 3 meter.
+  <br /> ...
+  <br /> De vijftiende dag bereikt hij de 19 meter, maar glijdt terug naar de 15 meter.
+  <br /> De zestiende dag bereikt hij de 20 meter, dus nu is hij aan de rand van de put gekomen!
+  <br /> Conclusie: De slak bereikt de bovenrand van de put op de zestiende dag!...
+</p>    
+    `),
+    new Riddle('dag-in-dag-uit', 'Dag in, dag uit', `
+<p>
+  <strong>Inleiding:</strong>
+  <br /> Overmorgen is het de derde dag na woensdag.
+</p>
+<p>
+  <strong>Vraag:</strong>
+  <br />Welke dag was het eergisteren?
+</p>     
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br /> De derde dag na woensdag is zaterdag. Als het overmorgen zaterdag is, dan is het vandaag donderdag. De oplossing
+  is dus: eergisteren was het dinsdag.
+</p>    
+    `),
+    new Riddle('tour-de-france', 'Tour de France', `
+<p>
+  <strong>Vraag:</strong>
+  <br />Als iemand in de Tour de France de tweede inhaalt, de hoeveelste is hij dan?
+</p>
+<p>
+  <strong>Antwoord:</strong>
+  <br />De tweede!
+</p>     
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br />De tweede!
+</p>
+    `),
+    new Riddle('tien-bomen', 'Tien bomen', `
+<p>
+  <strong>Inleiding:</strong>
+  <br />Joyce heeft tien bomen gekocht voor haar tuin. Ze wil deze bomen in vijf rijen planten, met in elke rij vier bomen.
+</p>
+<p>
+  <strong>Vraag:</strong>
+  <br />Hoe moet Joyce de bomen planten?
+</p>      
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br />De bomen moeten geplant worden op de hoeken van een vijfpuntige ster:
+  <br /><img src="assets/tentrees.gif" />
+</p>
+    `),
+    new Riddle('paardenhandel', 'Paardenhandel', `
+<p>
+  <strong>Inleiding:</strong>
+  <br />Een man besluit om een mooi paard te kopen. Hij betaalt 60 euro voor het paard, en hij is zeer tevreden met het sterke
+  dier. Na een jaar is de waarde van het paard gestegen tot 70 euro, en hij besluit om het paard te verkopen. Maar binnen
+  een paar dagen krijgt hij al spijt van de verkoop van zijn mooie paard, en hij koopt het paard weer terug. Helaas moet
+  hij 80 euro betalen om het paard terug te krijgen, dus verliest hij tien euro ten opzichte van zijn vorige verkoop. Weer
+  een jaar later besluit hij om het paard definitief te verkopen, en wel voor maar liefst 90 euro.
+</p>
+<p>
+  <strong>Vraag:</strong>
+  <br />Hoeveel euro maakt de man winst?
+</p>      
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br />We doen alsof het paardenhandel verhaaltje twee verschillende transacties beschrijft:
+  <br />Tijdens de eerste transactie koopt een man iets voor 60 euro en verkoopt het weer voor 70 euro, dus maakt hij 10
+  euro winst.
+  <br />Tijdens de tweede transactie koopt de man iets voor 80 euro en verkoopt het weer voor 90 euro, dus maakt hij wederom
+  10 euro winst.
+  <br />Conclusie: De man maakt een totale winst van 10 euro + 10 euro = 20 euro.
+  <br />Je kunt het ook op een andere manier bekijken: de totale uitgaven zijn 60 + 80 = 140 euro, en de totale inkomsten
+  zijn 70 + 90 = 160 euro. De winst is dus 160 - 140 = 20 euro.
+</p>
+    `),
+    new Riddle('tien-bewerkingen', 'Tien beweringen', `
+<p>
+  <strong>Inleiding:</strong>
+  <br />Hieronder staat een aantal beweringen:
+</p>
+<ol>
+  <li>
+    Precies één van deze beweringen is onwaar.
+  </li>
+  <li>
+    Precies twee van deze beweringen zijn onwaar.
+  </li>
+  <li>
+    Precies drie van deze beweringen zijn onwaar.
+  </li>
+  <li>
+    Precies vier van deze beweringen zijn onwaar.
+  </li>
+  <li>
+    Precies vijf van deze beweringen zijn onwaar.
+  </li>
+  <li>
+    Precies zes van deze beweringen zijn onwaar.
+  </li>
+  <li>
+    Precies zeven van deze beweringen zijn onwaar.
+  </li>
+  <li>
+    Precies acht van deze beweringen zijn onwaar.
+  </li>
+  <li>
+    Precies negen van deze beweringen zijn onwaar.
+  </li>
+  <li>
+    Precies tien van deze beweringen zijn onwaar.
+  </li>
+</ol>
+<p>
+  <strong>Vraag:</strong>
+  <br />Welke van deze beweringen is waar?
+</p>      
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br />De tien beweringen spreken elkaar allemaal tegen. Er kan dus maximaal één bewering waar zijn. Stel nu dat er geen
+  enkele bewering waar is. Dat zou betekenen dat bewering 10 wel waar is, wat een tegenspraak oplevert. Dit betekent dat
+  er precies negen beweringen onwaar moeten zijn en dus is alleen bewering 9 waar.
+</p>
+    `),
+    new Riddle('vierkanten-verstoppen-1', 'Vierkanten verstoppen 1', `
+<p>
+  <strong>Inleiding:</strong>
+  <br />Hier zie je vijf gelijke vierkanten.
+  <br /><img src="assets/sticking_away_squares1.gif" />
+</p>
+<p>
+  <strong>Vraag:</strong>
+  <br />Kun je hier drie vierkanten van overhouden door slechts drie stokjes weg te nemen?
+</p>      
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br /><img src="assets/sticking_away_squares1sol.gif" />
+</p>
+    `),
+    new Riddle('vierkanten-verstoppen-2', 'Vierkanten verstoppen 2', `
+<p>
+  <strong>Inleiding:</strong>
+  <br />Hier zie je zes gelijke vierkanten.
+  <br /><img src="assets/sticking_away_squares2.gif" />
+</p>
+<p>
+  <strong>Vraag:</strong>
+  <br />Kun je hier drie vierkanten van overhouden door vijf stokjes weg te nemen?
+</p>      
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br /><img src="assets/sticking_away_squares2sol.gif" />
+</p>
+    `),
+    new Riddle('vierkanten-verstoppen-3', 'Vierkanten verstoppen 3', `
+<p>
+  <strong>Inleiding:</strong>
+  <br /><img src="assets/sticking_away_squares3.gif" />
+</p>
+<p>
+  <strong>Vraag:</strong>
+  <br />Kun je slechts twee volledige vierkanten overhouden door twee stokjes weg te nemen uit het patroon hieronder?
+</p>      
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br /><img src="assets/sticking_away_squares3sol.gif" />
+</p>
+    `),
+    new Riddle('stoeien-met-stokjes-1', 'Stoeien met stokjes 1', `
+<p>
+  <strong>Inleiding:</strong>
+  <br />Zestien stokjes vormen acht gelijke driehoeken.
+  <br /><img src="assets/triangle_tricks1.gif" />
+</p>
+<p>
+  <strong>Vraag:</strong>
+  <br />Kun je vier van deze driehoeken overhouden door vier stokjes weg te nemen?
+</p>      
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br /><img src="assets/triangle_tricks1sol.gif" />
+</p>
+    `),
+    new Riddle('stoeien-met-stokejs-2', 'Stoeien met stokjes 2', `
+<p>
+  <strong>Inleiding:</strong>
+  <br />Dertien stokjes vormen acht driehoeken (zes kleine en twee grote).
+  <br /><img src="assets/triangle_tricks2.gif" />
+</p>
+<p>
+  <strong>Vraag:</strong>
+  <br />Kun je drie driehoeken overhouden door drie stokjes weg te nemen?
+</p>      
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br /><img src="assets/triangle_tricks2sol.gif" />
+</p>
+    `),
+    new Riddle('negen-punten', 'Negen punten', `
+<p>
+  <strong>Inleiding:</strong>
+  <br />Negen punten zijn geplaatst in drie rijen van drie, zoals te zien is in het plaatje. Deze negen punten moeten verbonden
+  worden door vier rechte lijnen die op elkaar aansluiten (dus vier verbonden rechte lijnen waarbij tussendoor 'de pen niet
+  van het papier' mag komen).
+  <br /><img src="assets/ninedots.gif" />
+</p>
+<p>
+  <strong>Vraag:</strong>
+  <br />Hoe moeten de vier lijnen worden getrokken?
+</p>      
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br /><img src="assets/ninedot1.gif" />
+</p>
+    `),
+    new Riddle('fitte-forens', 'Fitte Forens', `
+<p>
+  <strong>Inleiding:</strong>
+  <br />Fred neemt dagelijks de trein om van zijn werk naar zijn woonplaats Alkmaar te gaan. Normaal arriveert hij om zes
+  uur op het station van Alkmaar en wordt precies op dat moment met de auto afgehaald door zijn vrouw. Gisteravond nam Fred
+  onaangekondigd een vroegere trein en was daarom al om vijf uur op het station van Alkmaar. Hij besloot zijn vrouw alvast
+  tegemoet te lopen. Toen hij de auto met zijn vrouw tegenkwam, reed hij met haar mee naar huis. Op deze manier waren ze
+  tien minuten eerder thuis dan normaal. Freds vrouw rijdt altijd de hele weg tussen huis en het station met dezelfde constante
+  snelheid.
+</p>
+<p>
+  <strong>Vraag:</strong>
+  <br />Hoe lang heeft Fred gisteravond gelopen?
+</p>      
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br />Freds vrouw heeft tien minuten minder lang hoeven rijden, dus vijf minuten minder lang richting het station en vijf
+  minuten minder lang richting huis. Fred ontmoette zijn vrouw dus om vijf minuten voor zes. Hij liep al vanaf vijf uur,
+  dus heeft hij in totaal 55 minuten gelopen.
+</p>
+    `),
+    new Riddle('beestenboel', 'Beestenboel', `
+<p>
+  <strong>Inleiding:</strong>
+  <br />Boerin Marian wil nieuwe kippen, varkens en paarden kopen. Een nieuwe kip kost 50 eurocent, een varken 3 euro, en
+  een paard 10 euro. Boerin Marian heeft 100 euro waarmee ze precies 100 dieren wil kopen, maar wel zo dat ze van elke diersoort
+  er minstens één heeft.
+</p>
+<p>
+  <strong>Vraag:</strong>
+  <br />Hoeveel dieren moet boerin Marian van elke soort kopen?
+</p>
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br />5 paarden : 50 euro
+  <br />1 varken : 3 euro
+  <br />94 kippen : 47 euro
+  <br />--------------------------------------
+  <br />100 dieren : 100 euro
+</p>
+    `),
+    new Riddle('zeven-rijen-zestien-getallen', 'Zeven rijen, zestien getallen', `
+<p>
+  <strong>Inleiding:</strong>
+  <br />In de figuur hiernaast kun je elk van de zestien getallen 1 tot en met 16 invullen, zodanig dat de som van de getallen
+  in de zeven rijen steeds 29 is.
+  <br /><img src="assets/seven_rows_sixteen_numbers.gif" />
+</p>
+<p>
+  <strong>Vraag:</strong>
+  <br />Hoe moet dit?
+</p>
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br /><img src="assets/seven_rows_sixteen_numbers_sol.gif" />
+</p>
+    `),
+    new Riddle('de-wolf-de-geit-en-de-kool', 'De wolf, de geit en de kool', `
+<p>
+  <strong>Inleiding:</strong>
+  <br />Een man heeft een wolf, een geit en een kool. Hij moet een rivier oversteken met de twee dieren en de kool. Er is
+  een kleine roeiboot waarin hij slechts één ding tegelijk kan meenemen. Echter, als de wolf en de geit alleen gelaten worden,
+  eet de wolf de geit op. Als de geit en de kool alleen gelaten worden, eet de geit de kool op.
+</p>
+<p>
+  <strong>Vraag:</strong>
+  <br />Hoe kan de man de rivier oversteken met de twee dieren en de kool?
+</p>
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br />Er zijn twee oplossingen:
+</p>
+<ol>
+  <li>
+    Eerst neemt de man de geit mee, de wolf met de kool achterlatend. Dan gaat hij terug en neemt vervolgens de wolf mee naar
+    de overkant. Daar aangekomen, neemt hij de geit weer mee terug. Daarna brengt hij de kool over. Hij gaat nog een keer
+    terug, de wolf met de kool achterlatend, en neemt ten slotte de geit mee over.
+  </li>
+  <li>
+    Eerst neemt de man de geit mee, de wolf met de kool achterlatend. Dan gaat hij terug een neemt vervolgens de kool mee naar
+    de overkant. Daar aangekomen, neemt hij de geit weer mee terug. Daarna brengt hij de wolf over. Hij gaat nog een keer
+    terug, de wolf met de kool achterlatend, en neemt ten slotte de geit mee over.
+  </li>
+</ol>
+    `),
+    new Riddle('oude-meester', 'Oude meester', `
+<p>
+  <strong>Inleiding:</strong>
+  <br />De drie vrienden Pablo, Edvard en Henri praten met elkaar over de kunstcollectie van Leonardo. Pablo zegt: "Leonardo
+  heeft minstens vier schilderijen van Rembrandt." Edvard zegt: "Nee hoor, hij heeft minder dan vier Rembrandts." "Volgens
+  mij," zegt Henri, "heeft Leonardo minstens één Rembrandt."
+</p>
+<p>
+  <strong>Vraag:</strong>
+  <br />Als je weet dat slechts één van de drie vrienden gelijk heeft, hoeveel Rembrandts bezit Leonardo dan?
+</p>
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br />Bekijk de beweringen over het aantal schilderijen van Rembrandt. Als Pablo gelijk zou hebben ("minstens vier"), dan
+  zou Henri ("minstens één") ook gelijk hebben. Als Henri gelijk zou hebben ("minstens één"), dan zou óf Pablo ("minstens
+  vier") of Edvard ("minder dan vier") ook gelijk hebben. Dus heeft Edvard gelijk en bezit Leonardo dus minder dan één Rembrandt,
+  en dus geen enkele Rembrandt.
+</p>
+    `),
+    new Riddle('koddige-kruiken', 'Koddige kruiken', `
+<p>
+  <strong>Inleiding:</strong>
+  <br />Je staat naast een waterbron, en je hebt twee kruiken. De ene kruik heeft een inhoud van 3 liter en de andere kruik
+  een inhoud van 5 liter.
+</p>
+<p>
+  <strong>Vraag:</strong>
+  <br />Hoe kun je 4 liter water afmeten met deze twee kruiken?
+</p>
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br />2 oplossingen:
+</p>
+<ol>
+  <li>
+    Vul de 5-liter kruik. Vul dan de 3-liter kruik tot de rand met water uit de 5-liter kruik. Nu heb je 2 liter water over in
+    de 5-liter kruik. Leeg de 3-liter kruik en giet het water uit de 5-liter kruik in de 3-liter kruik. Vul de 5-liter kruik
+    opnieuw, en vul de 3-liter kruik bij tot aan de rand. Omdat er al 2 liter water in de 3-liter kruik zat, is er nu 1 liter
+    uit de 5-liter kruik verwijderd, waardoor er 4 liter water over is gebleven in de 5-liter kruik.
+  </li>
+  <li>
+    Vul de 3-liter kruik en giet het water uit deze kruik vervolgens in de 5-liter kruik. Vul dan de 3-liter kruik opnieuw en
+    vul de 5-liter kruik bij tot aan de rand. Omdat er al 3 liter water in de 5-liter kruik zat, is er nu 2 liter water uit
+    de 3-liter kruik bijgekomen, waardoor er 1 liter water over is in de 3-liter kruik. Giet de 5-liter kruik leeg. Giet
+    de ene liter uit de 3-liter kruik in de 5-liter kruik. Vul de 3-liter kruik opnieuw en leeg deze in de 5 liter kruik.
+    Nu zit er 4 liter water in de 5-liter kruik.
+  </li>
+</ol>
+    `),
+    new Riddle('lastige-lamp', 'Lastige lamp', `
+<p>
+  <strong>Inleiding:</strong>
+  <br />In een kamer bevindt zich een gloeilamp. Buiten de kamer bevinden zich drie schakelaars, waarvan er slechts één met
+  de lamp is verbonden. In de beginsituatie staan alle schakelaars op 'uit' en brandt de lamp niet.
+</p>
+<p>
+  <strong>Vraag:</strong>
+  <br />Als je maar één keer de kamer in mag gaan om te controleren of de lamp al dan niet brandt (je kunt dit namelijk van
+  buitenaf absoluut niet zien), hoe kun je dan te weten komen met welke van de drie schakelaars je de lamp kunt aan- en uitdoen?
+</p>
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br />Om de juiste schakelaar (1, 2 of 3) te vinden, zet je schakelaar 1 om en laat deze gedurende een aantal minuten op
+  'aan' staan. Daarna schakel je nummer 1 weer uit en zet schakelaar 2 aan. Nu ga je de kamer binnen. Brandt het licht, dan
+  is dus schakelaar 2 de juiste. Brandt het licht niet, dan is het dus 1 of 3. Even voelen aan de gloeilamp geeft dan direct
+  het antwoord: is de lamp nog warm, dan is schakelaar 1 de juiste, is de lamp koud, dan is het nummer 3.
+</p>
+    `),
+    new Riddle('lange-lonten', 'Lange lonten', `
+<p>
+  <strong>Inleiding:</strong>
+  <br />Je hebt de beschikking over een aantal lange lonten waarvan je slechts weet dat ze precies een uur branden nadat
+  je ze aan het uiteinde aansteekt. Je weet echter niet of ze met constante snelheid branden, dus de eerste helft van een
+  lont kan in 10 minuten zijn opgebrand terwijl pas vijftig minuten later de complete lont is opgebrand...
+</p>
+<p>
+  <strong>Vraag:</strong>
+  <br />Hoe kun je met behulp van deze lonten precies drie kwartier in tijd afmeten?
+</p>      
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br />Je kunt met twee lonten die elk exact een uur branden precies drie kwartier afmeten, door de eerste lont aan beide
+  kanten tegelijk aan te steken en de andere lont op dat zelfde moment aan één uiteinde aan te steken. Als de eerste lont
+  na precies een half uur is opgebrand (!) dan is van de tweede lont nog precies een half uur brandtijd over. Steek van de
+  tweede lont nu ook het andere uiteinde aan, en vervolgens is na een kwartier ook die andere lont opgebrand, en zijn we
+  dus precies drie kwartier verder!
+</p>
+    `),
+    new Riddle('lollige-leugenaar', 'Lollige leugenaar', `
+<p>
+  <strong>Inleiding:</strong>
+  <br />Richard is een vreemde leugenaar. Op zes dagen van de week liegt hij, maar op de zevende dag spreekt hij altijd de
+  waarheid. De volgende uitspraken deed hij op drie opeenvolgende dagen:
+  <br />Dag 1: "Ik lieg op maandag en dinsdag."
+  <br />Dag 2: "Vandaag is het donderdag, zaterdag of zondag."
+  <br />Dag 3: "Ik lieg op woensdag en vrijdag."
+</p>
+<p>
+  <strong>Vraag:</strong>
+  <br />Op welke dag spreekt Richard de waarheid?
+</p>      
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br />Er is gegeven dat Richard slechts op één dag de waarheid spreekt. Wanneer de uitspraak op dag 1 onwaar is, betekent
+  dit dus dat hij de waarheid spreekt op maandag of dinsdag. Wanneer de uitspraak op dag 3 onwaar is, betekent dit dat hij
+  de waarheid spreekt op woensdag of vrijdag. Omdat Richard op slechts één dag de waarheid spreekt, kunnen deze uitspraken
+  niet beide onwaar zijn. Precies één van deze uitspraken moet dus waar zijn, en de uitspraak op dag 2 moet onwaar zijn.
+  <br />Stel dat de uitspraak op dag 1 waar is. De uitspraak op dag 3 is dan onwaar, waaruit volgt dat Richard de waarheid
+  spreekt op woensdag of vrijdag. Dus dag 1 is een woensdag of een vrijdag. Dag 2 is dan dus een donderdag of een zaterdag.
+  Dit zou echter betekenen dat de uitspraak op dag 2 waar is, wat niet kan. Hieruit volgt dat de uitspraak op dag 1 onwaar
+  is.
+  <br />Dit betekent dat Richard de waarheid sprak op dag 3 en dat dit een maandag of dinsdag is. Dag 2 is dus een zondag
+  of een maandag. Omdat de uitspraak op dag 2 onwaar moet zijn, volgt dat dag 2 een maandag is.
+  <br />Dag 3 is dus een dinsdag. De dag waarop Richard de waarheid spreekt is dus dinsdag.
+</p>
+    `),
+    new Riddle('koele-kikkers', 'Koele kikkers (doe-opdracht)', `
+<p>
+  <strong>Inleiding:</strong>
+  <br />Hier zie je een vijver met zes vrolijke kikkers. Je moet de bruine en groene kikkers van plaats laten verwisselen,
+  en daarbij de volgende spelregels gebruiken:
+</p>
+<ul>
+  <li>
+    Een kikker kan alleen naar een lege waterlelie springen.
+  </li>
+  <li>
+    Een kikker kan over ten hoogste één andere kikker, met een andere kleur, heen springen.
+  </li>
+  <li>
+    Een kikker kan alleen voorwaarts springen (dus de groene kikkers springen naar rechts en de bruine kikkers springen naar
+    links).
+  </li>
+</ul>
+<p>
+  <strong>Vraag:</strong>
+  <br />Hoe moet dit gedaan worden?
+</p>      
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br />Nummer de waterlelies van links naar rechts van 1 tot en met 7. Laat dan achtereenvolgens de volgende kikkers springen:
+</p>
+<ol>
+  <li>
+    De groene kikker van lelie 3.
+  </li>
+  <li>
+    De bruine kikker van lelie 5.
+  </li>
+  <li>
+    De bruine kikker van lelie 6.
+  </li>
+  <li>
+    De groene kikker van lelie 4.
+  </li>
+  <li>
+    De groene kikker van lelie 2.
+  </li>
+  <li>
+    De groene kikker van lelie 1.
+  </li>
+  <li>
+    De bruine kikker van lelie 3.
+  </li>
+  <li>
+    De bruine kikker van lelie 5.
+  </li>
+  <li>
+    De bruine kikker van lelie 7.
+  </li>
+  <li>
+    De groene kikker van lelie 6.
+  </li>
+  <li>
+    De groene kikker van lelie 4.
+  </li>
+  <li>
+    De groene kikker van lelie 2.
+  </li>
+  <li>
+    De bruine kikker van lelie 3.
+  </li>
+  <li>
+    De bruine kikker van lelie 5.
+  </li>
+  <li>
+    De groene kikker van lelie 4.
+  </li>
+</ol>
+<p>
+  Opmerking: het is ook mogelijk om de bovenstaande oplossing te spiegelen, en te beginnen met de bruine kikker van lelie 5.
+</p>
+    `),
+    new Riddle('bevrijdende-brug', 'Bevrijdende brug', `
+<p>
+  <strong>Inleiding:</strong>
+  <br />	
+Vier mannen willen over een brug en ze bevinden zich allemaal aan dezelfde kant. Het is nacht en ze hebben slechts één zaklamp bij zich. Tevens kunnen er maximaal twee mannen tegelijk over de brug, en elk groepje (van één of twee personen) dat de brug over gaat, moet de zaklamp bij zich hebben.
+<br />De zaklamp zal heen en weer moeten worden gebracht, want hij kan niet worden gegooid, enz. Elke man heeft een verschillende snelheid. Een koppel zal dus samen net zo lang nodig hebben als de langzaamste van hen twee. Man 1 heeft 1 minuut nodig om de brug te passeren, man 2 heeft 2 minuten nodig, man 3 heeft 5 minuten nodig, en man 4 heeft 10 minuten nodig. Bijvoorbeeld, als man 1 en man 3 samen de brug oversteken, zullen ze daar 5 minuten voor nodig hebben.
+</p>
+<p>
+  <strong>Vraag:</strong>
+  <br />Hoe kunnen de mannen de brug passeren in 17 minuten?
+</p>      
+    `, `
+<p>
+  <strong>Antwoord:</strong>
+  <br />Eerst zullen man 1 en 2 de brug moeten passeren. Dit kost 2 minuten.
+  <br />Daarna zal man 1 terug moeten lopen met de zaklamp, wat 1 minuut kost.
+  <br />Dan zullen man 3 en man 4 over de brug moeten, wat 10 minuten kost.
+  <br />Hierna loopt man 2 terug met de zaklamp, wat twee minuten duurt.
+  <br />Dan zullen man 1 en 2 wederom gezamenlijk de brug moeten passeren, wat ook weer 2 minuten kost.
+  <br />In het totaal zijn er dus: 2+1+10+2+2=17 minuten verstreken.
+</p>
+    `)
+  ];
+
+}
